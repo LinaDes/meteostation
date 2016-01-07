@@ -19,6 +19,10 @@ const char SLIP_END = '\xC0';
 const char SLIP_ESC = '\xDB';
 const char SLIP_ESC_END = '\xDC';
 const char SLIP_ESC_ESC = '\xDD';
+const char CS_PING = '\x00';
+const char CS_INFO = '\x01';
+const char LOC_ADR = '\x00';
+
 
 int readCommand(char *buf)
 {
@@ -47,6 +51,7 @@ int readCommand(char *buf)
           }
           else
             buf[i] = c1;
+          i++;
           break;
         case SLIP_ESC_ESC:
           if (escaped)
@@ -56,6 +61,7 @@ int readCommand(char *buf)
           }
           else
             buf[i] = c1;
+          i++;
           break;
         default:
           if (escaped)
@@ -64,9 +70,9 @@ int readCommand(char *buf)
           }
           else
           buf[i] = c1;
-        break;
+          i++;
+          break;
       }
-      i++;
     }
   }
   return i;
@@ -97,17 +103,17 @@ int transferData(char *buf, unsigned char cnt)
 
 unsigned short getCRC(char *buf, unsigned char cnt)
 {
-  unsigned temp, temp2, flag;
+  unsigned short temp, temp2, flag;
   temp = 0xFFFF;
   for (int i = 0; i < cnt; i++)
   {
-    temp = temp ^ buf[i];
+    temp ^= (unsigned char) buf[i];
     for (int j = 1; j <= 8; j++)
     { 
       flag = temp & 0x0001;
-      temp = temp >> 1;
+      temp >>= 1;
       if (flag)
-        temp = temp ^ 0xA001;
+        temp ^= 0xA001;
     }
   }
   temp2 = temp >> 8;
@@ -118,7 +124,7 @@ unsigned short getCRC(char *buf, unsigned char cnt)
 
 int addCRC(char *buf, unsigned char cnt)
 {
-  unsigned short crc = getCRC(buf, cnt);
+  short crc = getCRC(buf, cnt);
   memcpy(&buf[cnt], &crc, 2);
   return cnt + 2;
 }
@@ -163,6 +169,8 @@ void printAddress(DeviceAddress deviceAddress)
   }
 }
 
+
+
 void loop()
 {
   display.clearDisplay();
@@ -170,44 +178,74 @@ void loop()
   char readbuf[100];
   char writebuf[100];
   char tmpbuf[50];
+
+//writebuf[0] = LOC_ADR;
+//writebuf[1] = '\x55';
+//writebuf[2] = '\xAA';
+//writebuf[3] = '\x51';
+//writebuf[4] = '\xAB';
+//unsigned short crctest = getCRC(writebuf, 5);
+//sprintf(tmpbuf, "%x", crctest);
+//for (int i = 0; i < 4; i++)
+//{
+//  display.write(tmpbuf[i]);
+//}
+//display.write('\n');
+  
   int msglen = readCommand(readbuf);
+
+  sprintf(tmpbuf, "%d", msglen);
+  for (int i = 0; i < 2; i++)
+  {
+    display.write(tmpbuf[i]);
+  }
+  display.write('\n');
+
   if (msglen)
   {
-    unsigned short msgcrc;
+    short msgcrc;
     memcpy(&msgcrc, &readbuf[msglen-2], 2);
-    unsigned short crc = getCRC(readbuf, msglen-2);
+    short crc = getCRC(readbuf, msglen-2);
+    sprintf(tmpbuf, "%x", msgcrc);
+    for (int i = 0; i < 4; i++)
+    {
+      display.write(tmpbuf[i]);
+    }
+    display.write('\n');
+    sprintf(tmpbuf, "%x", crc);
+    for (int i = 0; i < 4; i++)
+    {
+      display.write(tmpbuf[i]);
+    }
+    display.write('\n');
+
     if (crc == msgcrc)
     {
-      sprintf(tmpbuf, "%x", msgcrc);
-      for (int i = 0; i < 4; i++)
+      char adr = readbuf[0];
+      char cs = readbuf[1];
+      char mtd = readbuf[2];
+      if (adr == LOC_ADR)
       {
-        display.write(tmpbuf[i]);
+        switch (cs)
+        {
+          case CS_PING:
+            writebuf[0] = LOC_ADR;
+            writebuf[1] = '\x55';
+            writebuf[2] = '\xAA';
+            writebuf[3] = '\x55';
+            writebuf[4] = '\xAA';
+            int len = addCRC(writebuf, 5);
+            delay(100);
+            transferData(writebuf, len);
+            break;
+        }
       }
-      display.write('\n');
-      sprintf(tmpbuf, "%x", crc);
-      for (int i = 0; i < 4; i++)
-      {
-        display.write(tmpbuf[i]);
-      }
-      display.write('\n');
     }
-    
   }
 
   display.display();
-
-//  memcpy(writebuf, readbuf, 4);
-  writebuf[0] = '\x01';
-  writebuf[1] = '\x02';
-  writebuf[2] = '\xC0';
-  writebuf[3] = '\x03';
-
   
-  int ccc = addCRC(writebuf, 4);
-  
-  transferData(writebuf, ccc);
-  
-  delay(4000);
+  delay(5000);
   display.clearDisplay();
   sensors.requestTemperatures();
 
@@ -224,7 +262,6 @@ void loop()
   float temperature = bmp.readTemperature();
   int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
 
-//  display.write(END);
   display.write('T');
   display.write('-');
   memset(buf, 0, sizeof(buf));

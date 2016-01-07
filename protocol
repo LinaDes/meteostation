@@ -1,0 +1,29 @@
+Формат сообщения:
+адрес_прибора(1 байт) класс(1 байт) метод(1 байт) данные(N байт)
+
+Формат ответа:
+адрес_прибора(1 байт) данные(N байт)
+
+адрес_прибора = 0 (по крайней мере, пока)
+
+classes:
+    0   csPING
+    methods:
+        0   returns 0x55 0xAA
+    1   csINFO
+    methods:
+        0   qty of temp sensors
+            returns:    qty (unsigned char)
+        1   retrieves a temperature from the sensor N
+            data:
+                N (unsigned char)
+                returns:
+                    temperature (float)
+        2   retrieve the sernum of the sensor N
+            data:
+                N (unsigned char)
+                returns:
+                    sernum (???)
+        3   retrieve the pressure
+            returns:
+                pressure (unsigned short)

@@ -34,43 +34,41 @@ def printPacket(packet):
 def sendCommand(packet):
     crcPack = slipC.addcrc(packet)
     out = slipC.slip(crcPack)
-    printPacket(out)
     ser.write(out)
     print ('Sent ' + str(len(out)) + ' bytes: '),
     printPacket(out)
 
 def receiveAnswer():
-    result = ''
+    packet = ''
     char = ser.read(1)
     if char == SLIP_END:
-        result += char
+        packet += char
         beginflag = True
         while beginflag:
             c = ser.read(1)
-            result += c
+            packet += c
             if c == SLIP_END:
                 beginflag = False
-    print ('Received ' + str(len(result)) + ' bytes: '),
-    printPacket(result)
-    return result
-
-def makePacket(adr, cs, mtd, data):
-    return chr(adr) + chr(cs) + chr(mtd) + chr(data)
-
-# packet = '\x55' + '\xAA' + '\x55' + '\xc0' + '\xAA' + '\x01' + '\x00' + '\x99' + '\x89' + '\x74' + '\xFF' + '\xFC' + '\xC0' + '\x6D'
-# packet = '\x00'
-# packet = 'a' + 'b' + 'c' + 'd'
-
-packet = makePacket(0, 0x01, 0x01, 0)
-print('msg - '),
-printPacket(packet)
-sendCommand(packet)
-packet2 = receiveAnswer()
-packet3 = slipC.unslip(packet2)
-print ('after antiSLIP - '),
-printPacket(packet3)
-if slipC.checkcrc(packet3):
-    print ('msg - '),
-    printPacket(slipC.getmsgpart(packet3))
+    print ('Received ' + str(len(packet)) + ' bytes: '),
+    printPacket(packet)
+    unsliped = slipC.unslip(packet)
+    if slipC.checkcrc(unsliped):
+        print ('CRC - OK')
+        return slipC.getmsgpart(unsliped)
+    else:
+        return ''
 
 
+def ping(adr):
+    print ('Ping adr=' + str(adr))
+    sendCommand(chr(0) + chr(0) + chr(200) + chr(233) + chr(193))
+    # sendCommand(chr(0) + chr(0x55) + chr(0xAA) + chr(0x51) + chr(0xAB) + chr(0xFF))
+    if receiveAnswer() == ((chr(0) + chr(0x55) + chr(0xAA) + chr(0x55) + chr(0xAA))):
+        print ('Ping to ' + str(adr) + ' OK')
+        return True
+    else:
+        return False
+
+print (ping(0))
+
+# 0xc3 0x69

@@ -27,7 +27,7 @@ class SlipConv():
         temp2 = temp >> 8
         temp = (temp << 8) | temp2
         temp &= 0xffff
-        print ('crc = ' + str(temp))
+        # print ('CRC = ' + hex(temp & 0xff)) + ' ' + hex(temp >> 8)
         return temp
 
     def addcrc(self, packet):
@@ -37,7 +37,7 @@ class SlipConv():
     def checkcrc(self, packet):
         tmpcrc = self.__getcrc(self.getmsgpart(packet))
         msgcrc = self.getcrcpart(packet)
-        return (chr(tmpcrc >> 8) + chr(tmpcrc & 0xff)) == msgcrc
+        return (chr(tmpcrc & 0xff) + chr(tmpcrc >> 8)) == msgcrc
 
     def getcrcpart(self, packet):
         return packet[len(packet)-2:len(packet)]
