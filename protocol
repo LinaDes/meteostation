@@ -9,7 +9,7 @@
 classes:
     0   csPING
     methods:
-        0   returns 0x55 0xAA
+        0   returns 0x55 0xAA 0x55 0xAA
     1   csINFO
     methods:
         0   qty of temp sensors
