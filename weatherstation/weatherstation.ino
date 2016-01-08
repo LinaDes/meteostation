@@ -10,9 +10,12 @@
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-DeviceAddress insideThermometer, outsideThermometer;
+//DeviceAddress insideThermometer, outsideThermometer, third;
 Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
 Adafruit_BMP085 bmp;
+const unsigned char MAXNUMBERS = 10;
+DeviceAddress addresses[MAXNUMBERS];
+unsigned char numbers;
 
 const int bufLength = 8;
 const char SLIP_END = '\xC0';
@@ -22,7 +25,6 @@ const char SLIP_ESC_ESC = '\xDD';
 const char CS_PING = '\x00';
 const char CS_INFO = '\x01';
 const char LOC_ADR = '\x00';
-
 
 int readCommand(char *buf)
 {
@@ -124,7 +126,7 @@ unsigned short getCRC(char *buf, unsigned char cnt)
 
 int addCRC(char *buf, unsigned char cnt)
 {
-  short crc = getCRC(buf, cnt);
+  unsigned short crc = getCRC(buf, cnt);
   memcpy(&buf[cnt], &crc, 2);
   return cnt + 2;
 }
@@ -138,25 +140,19 @@ void setup()
   display.clearDisplay();
   display.setContrast(40);
   display.display();
-//  pinMode(13, OUTPUT);
-
   sensors.begin();
-  //  Serial.print("Locating devices...");
-  //  Serial.print("Found ");
-  //  Serial.print(sensors.getDeviceCount(), DEC);
-  //  Serial.println(" devices.");
-  //  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
-  //  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1");
-  sensors.getAddress(insideThermometer, 0);
-  sensors.getAddress(outsideThermometer, 1);
-  //  Serial.print("Device 0 Address: ");
-  //  printAddress(insideThermometer);
-  //  Serial.println();
-  //  Serial.print("Device 1 Address: ");
-  //  printAddress(outsideThermometer);
-  //  Serial.println();
-  sensors.setResolution(insideThermometer, TEMPERATURE_PRECISION);
-  sensors.setResolution(outsideThermometer, TEMPERATURE_PRECISION);
+  numbers = 0;
+  for (int i = 0; i < MAXNUMBERS; i++)
+  {
+    if (!sensors.getAddress(addresses[i], i))
+       break;
+    numbers++;
+  }
+  for (unsigned char i = 0; i < numbers; i++)
+  {
+      sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
+//      printAddress(addresses[i]);
+  }
 }
 
 
@@ -164,9 +160,11 @@ void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
+    Serial.print(" ");
     if (deviceAddress[i] < 16) Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
+  Serial.println();
 }
 
 
@@ -194,7 +192,7 @@ void loop()
   
   int msglen = readCommand(readbuf);
 
-  sprintf(tmpbuf, "%d", msglen);
+  sprintf(tmpbuf, "%d", numbers);
   for (int i = 0; i < 2; i++)
   {
     display.write(tmpbuf[i]);
@@ -203,9 +201,9 @@ void loop()
 
   if (msglen)
   {
-    short msgcrc;
+    unsigned short msgcrc;
     memcpy(&msgcrc, &readbuf[msglen-2], 2);
-    short crc = getCRC(readbuf, msglen-2);
+    unsigned short crc = getCRC(readbuf, msglen-2);
     sprintf(tmpbuf, "%x", msgcrc);
     for (int i = 0; i < 4; i++)
     {
@@ -224,6 +222,7 @@ void loop()
       char adr = readbuf[0];
       char cs = readbuf[1];
       char mtd = readbuf[2];
+      int len;
       if (adr == LOC_ADR)
       {
         switch (cs)
@@ -234,9 +233,21 @@ void loop()
             writebuf[2] = '\xAA';
             writebuf[3] = '\x55';
             writebuf[4] = '\xAA';
-            int len = addCRC(writebuf, 5);
+            len = addCRC(writebuf, 5);
             delay(100);
             transferData(writebuf, len);
+            break;
+          case CS_INFO:
+            switch (mtd)
+            {
+               case 0:
+                  writebuf[0] = LOC_ADR;
+                  writebuf[1] = numbers;
+                  len = addCRC(writebuf, 2);
+                  delay(100);
+                  transferData(writebuf, len);
+                  break;
+            }
             break;
         }
       }
@@ -252,8 +263,8 @@ void loop()
   display.clearDisplay();
   display.display();
 
-  float temp1 = sensors.getTempC(insideThermometer);
-  float temp2 = sensors.getTempC(outsideThermometer);
+  float temp1 = sensors.getTempC(addresses[0]);
+  float temp2 = sensors.getTempC(addresses[1]);
 
   char buf[bufLength];
   display.setCursor(0, 0);
@@ -293,7 +304,6 @@ void loop()
   display.write(buf[i]);
   }
   display.write('\n');
-
 
   //  display.setCursor(0, LCDHEIGHT/2);
   display.write('P');

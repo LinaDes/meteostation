@@ -61,7 +61,7 @@ def receiveAnswer():
 
 def ping(adr):
     print ('Ping adr=' + str(adr))
-    sendCommand(chr(0) + chr(0) + chr(200) + chr(233) + chr(193))
+    sendCommand(chr(adr) + chr(0) + chr(200) + chr(233) + chr(193))
     # sendCommand(chr(0) + chr(0x55) + chr(0xAA) + chr(0x51) + chr(0xAB) + chr(0xFF))
     if receiveAnswer() == ((chr(0) + chr(0x55) + chr(0xAA) + chr(0x55) + chr(0xAA))):
         print ('Ping to ' + str(adr) + ' OK')
@@ -69,6 +69,16 @@ def ping(adr):
     else:
         return False
 
-print (ping(0))
+def getNumbersOfSensors(adr):
+    print ('Get numbers of temperature sensors.')
+    sendCommand(chr(adr) + chr(1) + chr(0))
+    res = receiveAnswer()
+    print ('It has ' + str(ord(res[1])) + ' sensors.')
+    return res[1]
+
+adr = 0
+if ping(adr):
+    numbers = ord(getNumbersOfSensors(adr))
+    print(numbers)
 
 # 0xc3 0x69
