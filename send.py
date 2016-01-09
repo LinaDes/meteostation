@@ -4,6 +4,7 @@ import sys
 import serial
 import time
 from slip import SlipConv
+import struct
 
 
 # if (len(sys.argv) != 3):
@@ -56,6 +57,7 @@ def receiveAnswer():
         print ('CRC - OK')
         return slipC.getmsgpart(unsliped)
     else:
+        print ('BAD CRC')
         return ''
 
 
@@ -76,9 +78,18 @@ def getNumbersOfSensors(adr):
     print ('It has ' + str(ord(res[1])) + ' sensors.')
     return res[1]
 
+def getTempFromSensorN(adr, number):
+    print ('Get a temperature from the sensor ' + str(number) + '.')
+    sendCommand(chr(adr) + chr(1) + chr(1) + chr(number))
+    res = receiveAnswer()
+    temp, = struct.unpack('<f', res[1:len(res)])
+    print (str(temp) + ' C.')
+    return temp
+
 adr = 0
 if ping(adr):
     numbers = ord(getNumbersOfSensors(adr))
     print(numbers)
+    for i in range(1, numbers+1, 1):
+      print ("%.1f" % getTempFromSensorN(0, i))
 
-# 0xc3 0x69

@@ -10,7 +10,6 @@
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-//DeviceAddress insideThermometer, outsideThermometer, third;
 Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
 Adafruit_BMP085 bmp;
 const unsigned char MAXNUMBERS = 10;
@@ -150,23 +149,20 @@ void setup()
   }
   for (unsigned char i = 0; i < numbers; i++)
   {
-      sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
-//      printAddress(addresses[i]);
+    sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
   }
 }
 
-
-void printAddress(DeviceAddress deviceAddress)
-{
-  for (uint8_t i = 0; i < 8; i++)
-  {
-    Serial.print(" ");
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
-  }
-  Serial.println();
-}
-
+//void printAddress(DeviceAddress deviceAddress)
+//{
+//  for (uint8_t i = 0; i < 8; i++)
+//  {
+//    Serial.print(" ");
+//    if (deviceAddress[i] < 16) Serial.print("0");
+//    Serial.print(deviceAddress[i], HEX);
+//  }
+//  Serial.println();
+//}
 
 
 void loop()
@@ -177,28 +173,8 @@ void loop()
   char writebuf[100];
   char tmpbuf[50];
 
-//writebuf[0] = LOC_ADR;
-//writebuf[1] = '\x55';
-//writebuf[2] = '\xAA';
-//writebuf[3] = '\x51';
-//writebuf[4] = '\xAB';
-//unsigned short crctest = getCRC(writebuf, 5);
-//sprintf(tmpbuf, "%x", crctest);
-//for (int i = 0; i < 4; i++)
-//{
-//  display.write(tmpbuf[i]);
-//}
-//display.write('\n');
-  
+  sensors.requestTemperatures();
   int msglen = readCommand(readbuf);
-
-  sprintf(tmpbuf, "%d", numbers);
-  for (int i = 0; i < 2; i++)
-  {
-    display.write(tmpbuf[i]);
-  }
-  display.write('\n');
-
   if (msglen)
   {
     unsigned short msgcrc;
@@ -247,6 +223,15 @@ void loop()
                   delay(100);
                   transferData(writebuf, len);
                   break;
+                case 1:
+                  unsigned char n = (unsigned char) readbuf[3];
+                  float temp = sensors.getTempC(addresses[n-1]);
+                  writebuf[0] = LOC_ADR;
+                  memcpy(&writebuf[1], &temp, 4);
+                  len = addCRC(writebuf, 5);
+                  delay(100);
+                  transferData(writebuf, len);
+                  break;
             }
             break;
         }
@@ -254,58 +239,15 @@ void loop()
     }
   }
 
-  display.display();
-  
-  delay(5000);
-  display.clearDisplay();
-  sensors.requestTemperatures();
-
   display.clearDisplay();
   display.display();
-
-  float temp1 = sensors.getTempC(addresses[0]);
-  float temp2 = sensors.getTempC(addresses[1]);
 
   char buf[bufLength];
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
-  float temperature = bmp.readTemperature();
+//  float temperature = bmp.readTemperature();
   int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
-
-  display.write('T');
-  display.write('-');
-  memset(buf, 0, sizeof(buf));
-  dtostrf(temperature, 4, 2, buf);
-  for (int i = 0; i < bufLength; i++)
-  {
-  display.write(buf[i]);
-  }
-  display.write('\n');
-
-  display.write('T');
-  display.write('1');
-  display.write('-');
-  memset(buf, 0, sizeof(buf));
-  dtostrf(temp1, 4, 2, buf);
-  for (int i = 0; i < bufLength; i++)
-  {
-  display.write(buf[i]);
-  }
-  display.write('\n');
-
-  display.write('T');
-  display.write('2');
-  display.write('-');
-  memset(buf, 0, sizeof(buf));
-  dtostrf(temp2, 4, 2, buf);
-  for (int i = 0; i < bufLength; i++)
-  {
-  display.write(buf[i]);
-  }
-  display.write('\n');
-
-  //  display.setCursor(0, LCDHEIGHT/2);
   display.write('P');
   display.write('-');
   memset(buf, 0, sizeof(buf));
@@ -314,10 +256,24 @@ void loop()
   {
   display.write(buf[i]);
   }
-
-
+  display.write('\n');
+  char tnum = '1';
+  for (int i = 0; i < numbers; i++)
+  {
+    float temp = sensors.getTempC(addresses[i]);
+    display.write('T');
+    display.write(tnum);
+    display.write('-');
+    memset(buf, 0, sizeof(buf));
+    dtostrf(temp, 4, 2, buf);
+    for (int i = 0; i < bufLength; i++)
+    {
+      display.write(buf[i]);
+    }
+    display.write('\n');
+    tnum++;
+  }
   display.display();
   delay(2000);
-
-  }
+}
 
