@@ -150,6 +150,7 @@ void setup()
   for (unsigned char i = 0; i < numbers; i++)
   {
     sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
+//    printAddress(addresses[i]);
   }
 }
 
@@ -174,6 +175,8 @@ void loop()
   char tmpbuf[50];
 
   sensors.requestTemperatures();
+  int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
+
   int msglen = readCommand(readbuf);
   if (msglen)
   {
@@ -199,6 +202,8 @@ void loop()
       char cs = readbuf[1];
       char mtd = readbuf[2];
       int len;
+      unsigned char n;
+      float temp;
       if (adr == LOC_ADR)
       {
         switch (cs)
@@ -224,10 +229,18 @@ void loop()
                   transferData(writebuf, len);
                   break;
                 case 1:
-                  unsigned char n = (unsigned char) readbuf[3];
-                  float temp = sensors.getTempC(addresses[n-1]);
+                  n = (unsigned char) readbuf[3];
+                  temp = sensors.getTempC(addresses[n-1]);
                   writebuf[0] = LOC_ADR;
                   memcpy(&writebuf[1], &temp, 4);
+                  memcpy(&writebuf[5], &addresses[n-1], 8);
+                  len = addCRC(writebuf, 13);
+                  delay(100);
+                  transferData(writebuf, len);
+                  break;
+                case 2:
+                  writebuf[0] = LOC_ADR;
+                  memcpy(&writebuf[1], &pressure, 4);
                   len = addCRC(writebuf, 5);
                   delay(100);
                   transferData(writebuf, len);
@@ -247,7 +260,7 @@ void loop()
   display.setTextColor(BLACK);
   display.setTextSize(1);
 //  float temperature = bmp.readTemperature();
-  int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
+//  int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
   display.write('P');
   display.write('-');
   memset(buf, 0, sizeof(buf));

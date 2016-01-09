@@ -82,14 +82,24 @@ def getTempFromSensorN(adr, number):
     print ('Get a temperature from the sensor ' + str(number) + '.')
     sendCommand(chr(adr) + chr(1) + chr(1) + chr(number))
     res = receiveAnswer()
-    temp, = struct.unpack('<f', res[1:len(res)])
-    print (str(temp) + ' C.')
-    return temp
+    temp, = struct.unpack('<f', res[1:5])
+    sernum = res[5:len(res)]
+    print ("%.1f" % temp + 'C on the sensor with the serial number'),
+    printPacket(sernum)
+    return temp, sernum
+
+def getPressure(adr):
+    print ('Get an atmospheric pressure.')
+    sendCommand(chr(adr) + chr(1) + chr(2))
+    res = receiveAnswer()
+    pressure, = struct.unpack('<i', res[1:5])
+    print (str(pressure) + ' mmHG.')
+    return pressure
 
 adr = 0
 if ping(adr):
+    pressure = getPressure(adr)
     numbers = ord(getNumbersOfSensors(adr))
-    print(numbers)
     for i in range(1, numbers+1, 1):
-      print ("%.1f" % getTempFromSensorN(0, i))
+        t, sn = getTempFromSensorN(0, i)
 

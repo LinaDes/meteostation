@@ -14,16 +14,11 @@ classes:
     methods:
         0   qty of temp sensors
             returns:    qty (unsigned char)
-        1   retrieves a temperature from the sensor N
+        1   retrieves a temperature and the sernum from the sensor N
             data:
                 N (unsigned char)
                 returns:
-                    temperature (float)
-        2   retrieve the sernum of the sensor N
-            data:
-                N (unsigned char)
-                returns:
-                    sernum (???)
-        3   retrieve the pressure
+                    temperature (float) sernum (8 bytes)
+        2   retrieve the pressure
             returns:
-                pressure (unsigned short)
+                pressure (int32_t)
