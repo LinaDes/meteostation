@@ -71,9 +71,10 @@ class SlipConv():
                     self.packet += char
             else:
                 if self.escaped:
-                    raise Exception('SLIP Protocol Error')
+                    # raise Exception('SLIP Protocol Error')
                     self.packet = ''
                     self.escaped = False
+                    return ''
                 else:
                     self.packet += char
                     self.started = True

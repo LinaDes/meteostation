@@ -168,8 +168,8 @@ void setup()
 
 void loop()
 {
-  display.clearDisplay();
-  display.display();
+//  display.clearDisplay();
+//  display.display();
   char readbuf[100];
   char writebuf[100];
   char tmpbuf[50];
@@ -259,8 +259,7 @@ void loop()
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
-//  float temperature = bmp.readTemperature();
-//  int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
+
   display.write('P');
   display.write('-');
   memset(buf, 0, sizeof(buf));
@@ -287,6 +286,6 @@ void loop()
     tnum++;
   }
   display.display();
-  delay(2000);
+  delay(200);
 }
 
