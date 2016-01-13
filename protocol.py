@@ -101,9 +101,10 @@ class Protocol():
         self.sendCommand(chr(adr) + chr(1) + chr(2))
         res = self.receiveAnswer()
         pressure, = struct.unpack('<i', res[1:5])
+        sernum = res[5]
         if self.log:
             print (str(pressure) + ' mmHg.')
-        return pressure
+        return pressure, sernum
 
 
 

@@ -241,7 +241,8 @@ void loop()
                 case 2:
                   writebuf[0] = LOC_ADR;
                   memcpy(&writebuf[1], &pressure, 4);
-                  len = addCRC(writebuf, 5);
+                  writebuf[5] = 0;
+                  len = addCRC(writebuf, 6);
                   delay(100);
                   transferData(writebuf, len);
                   break;
