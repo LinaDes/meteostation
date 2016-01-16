@@ -103,7 +103,8 @@ class Protocol():
         pressure, = struct.unpack('<i', res[1:5])
         sernum = res[5]
         if self.log:
-            print (str(pressure) + ' mmHg.')
+            print (str(pressure) + ' mmHg on the sensor with the serial number'),
+            self.printPacket(sernum)
         return pressure, sernum
 
 
