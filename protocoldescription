@@ -21,4 +21,4 @@ classes:
                     temperature (float) sernum (8 bytes)
         2   retrieve the pressure
             returns:
-                pressure (int32_t)
+                pressure (int32_t) sernum (1 byte)

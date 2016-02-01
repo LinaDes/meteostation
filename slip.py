@@ -1,6 +1,6 @@
 __author__ = 'Andrew Kalinin'
 
-class SlipConv():
+class SlipConv:
 
     def __init__(self):
         self.started = False
@@ -27,7 +27,6 @@ class SlipConv():
         temp2 = temp >> 8
         temp = (temp << 8) | temp2
         temp &= 0xffff
-        # print ('CRC = ' + hex(temp & 0xff)) + ' ' + hex(temp >> 8)
         return temp
 
     def addcrc(self, packet):
@@ -48,7 +47,6 @@ class SlipConv():
     def unslip(self, stream):
         packetlist = ''
         for char in stream:
-            # cc = hex(ord(char))
             if char == self.SLIP_END:
                 if self.started:
                     packetlist += self.packet
@@ -71,7 +69,6 @@ class SlipConv():
                     self.packet += char
             else:
                 if self.escaped:
-                    # raise Exception('SLIP Protocol Error')
                     self.packet = ''
                     self.escaped = False
                     return ''
@@ -84,13 +81,10 @@ class SlipConv():
     def slip(self, packet):
         encoded = self.SLIP_END
         for char in packet:
-            # SLIP_END
             if char == self.SLIP_END:
                 encoded += self.SLIP_ESC + self.SLIP_ESC_END
-            # SLIP_ESC
             elif char == self.SLIP_ESC:
                 encoded += self.SLIP_ESC + self.SLIP_ESC_ESC
-            # the rest can simply be appended
             else:
                 encoded += char
         encoded += self.SLIP_END

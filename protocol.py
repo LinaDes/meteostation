@@ -7,7 +7,7 @@ from slip import SlipConv
 import struct
 
 
-class Protocol():
+class Protocol:
 
     def __init__(self, port, baudrate, logon):
         self.log = logon
@@ -66,7 +66,6 @@ class Protocol():
         if self.log:
             print ('Ping adr = ' + str(adr))
         self.sendCommand(chr(adr) + chr(0) + chr(200) + chr(233) + chr(193))
-        # sendCommand(chr(0) + chr(0x55) + chr(0xAA) + chr(0x51) + chr(0xAB) + chr(0xFF))
         if self.receiveAnswer() == ((chr(0) + chr(0x55) + chr(0xAA) + chr(0x55) + chr(0xAA))):
             if self.log:
                 print ('Ping to ' + str(adr) + ' OK')
