@@ -36,7 +36,7 @@ class DBHelper:
     def getSensorId(self, sensorType, sernum):
         self.cursor.execute('SELECT _id FROM sensors WHERE sernum=?', (sernum,))
         selres = self.cursor.fetchall()
-        sensorId = -1
+        # sensorId = -1
         if len(selres) > 0:
             sensorId = selres[0][0]
         else:
@@ -45,8 +45,19 @@ class DBHelper:
             sensorId = self.cursor.fetchone()[0]
         return sensorId
 
-    def record(self, currenttime, value, sensorId):
+    def recordValue(self, currenttime, value, sensorId):
         self.cursor.execute('INSERT INTO metering (time, value, sensorid) VALUES (?,?,?)', (currenttime, value, sensorId))
+
+    def getAll(self):
+        self.cursor.execute('SELECT max(_id) from sensors')
+        number = self.cursor.fetchone()[0]
+        query = 'select time'
+        for i in range(1, number+1):
+            query += ', (select value from metering where sensorid=%s and time=m.time)' % str(i)
+        query += ' from metering m group by time'
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
     def close(self):
         self.dbconnect.commit()
+
