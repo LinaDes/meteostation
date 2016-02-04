@@ -1,3 +1,4 @@
+Протокол обмена с прибором:
 Формат сообщения:
 адрес_прибора(1 байт) класс(1 байт) метод(1 байт) данные(N байт)
 
@@ -7,10 +8,10 @@
 адрес_прибора = 0 (по крайней мере, пока)
 
 classes:
-    0   csPING
+    0   PING
     methods:
         0   returns 0x55 0xAA 0x55 0xAA
-    1   csINFO
+    1   INFO
     methods:
         0   qty of temp sensors
             returns:    qty (unsigned char)
@@ -22,3 +23,13 @@ classes:
         2   retrieve the pressure
             returns:
                 pressure (int32_t) sernum (1 byte)
+
+API службы:
+без параметров
+
+mtd=last
+
+mtd=interval&min=XX&max=YY
+
+mtd=all
+
