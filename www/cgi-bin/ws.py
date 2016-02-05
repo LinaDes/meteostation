@@ -9,9 +9,15 @@ import cgi
 from dbhelper import DBHelper
 
 method = 'mtd'
+version = 'version'
+minThr = 'min'
+maxThr = 'max'
 
 dbFileName = modulePath + 'weatherstation.db'
 db = DBHelper(dbFileName)
+
+def makeJSON(records):
+    return json.JSONEncoder().encode({'sensors': db.getSensors(), 'records': records})
 
 args = cgi.FieldStorage()
 # print 'len = ' + str(len(args))
@@ -22,11 +28,21 @@ elif method in args:
     if args[method].value == 'last':
         print "Content-type: application/json"
         print
-        print (json.JSONEncoder().encode(db.getLast()))
+        print (makeJSON(db.getLast()))
     elif args[method].value == 'all':
         print "Content-type: application/json"
         print
-        print (json.JSONEncoder().encode(db.getAll()))
+        print (makeJSON(db.getAll()))
+    elif args[method].value == 'interval':
+        if minThr in args:
+            if maxThr in args:
+                print "Content-type: application/json"
+                print
+                print (makeJSON(db.getInterval(args[minThr].value, args[maxThr].value)))
+    elif args[method].value == version:
+        print "Content-type: application/json"
+        print
+        print (json.JSONEncoder().encode({version: 1}))
 
 
 db.close()

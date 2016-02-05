@@ -37,13 +37,13 @@ if device.ping(deviceAddress):
     pressure, sernum = device.getPressure(deviceAddress)
     print ('Pressure - ' + str(pressure) + ' mmHg, sensor')
     pressureSensorId = db.getSensorId(pressureSensorType, sernum)
-    db.recordValue(currenttime, pressure, pressureSensorId)
+    db.storeValue(currenttime, pressure, pressureSensorId)
     numbers = ord(device.getNumbersOfSensors(deviceAddress))
     for i in range(1, numbers+1, 1):
         temperature, sn = device.getTempFromSensorN(0, i)
         print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
         device.printPacket(sn)
         termSensorId = db.getSensorId(termSensorType, sn)
-        db.recordValue(currenttime, temperature, termSensorId)
+        db.storeValue(currenttime, temperature, termSensorId)
 
 db.close()

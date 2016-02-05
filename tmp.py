@@ -15,8 +15,9 @@ print
 print db.getLast()
 print
 
-for raw in db.getSensors():
-    print raw
+# for raw in db.getSensors():
+#     print raw
+print db.getSensors()
 print
 
 for raw in db.getInterval(1454599872, 1454599965):

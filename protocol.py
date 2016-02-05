@@ -26,7 +26,7 @@ class Protocol:
         time.sleep(2)
 
     def printPacket(self, packet):
-        print ' '.join(hex(ord(c)) for c in packet)
+        print ' '.join("%X" % ord(c) if ord(c) > 0x0f else '0' + "%X" % ord(c) for c in packet)
 
     def sendCommand(self, packet):
         crcPack = self.slipC.addcrc(packet)

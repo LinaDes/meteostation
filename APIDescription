@@ -25,11 +25,17 @@ classes:
                 pressure (int32_t) sernum (1 byte)
 
 API службы:
+http://host:port/ws.py
 без параметров
 
-mtd=last
+http://host:port/ws.py?mtd=last
+Возвращает последнюю запись
 
-mtd=interval&min=XX&max=YY
+http://host:port/ws.py?mtd=interval&min=XX&max=YY
+Возвращает диапазон записей между датами min и max
 
-mtd=all
+http://host:port/ws.py?mtd=all
+Возвращает все записи
 
+http://host:port/ws.py?mtd=version
+Возвращает версию API

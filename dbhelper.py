@@ -45,7 +45,7 @@ class DBHelper:
             sensorId = self.cursor.fetchone()[0]
         return sensorId
 
-    def recordValue(self, currenttime, value, sensorId):
+    def storeValue(self, currenttime, value, sensorId):
         self.cursor.execute('INSERT INTO metering (time, value, sensorid) VALUES (?,?,?)', (currenttime, value, sensorId))
 
     def getLast(self):
@@ -64,34 +64,35 @@ class DBHelper:
             res[str(i-1)] = raw[i - 1]
         return res
 
-    def getInterval(self, minTime, maxTime):
+    def getInterval(self, minTime = None, maxTime = None):
         self.cursor.execute('SELECT MAX(_id) FROM sensors')
         number = self.cursor.fetchone()[0]
         query = 'SELECT time'
         for i in range(1, number+1):
             query += ', (SELECT value FROM metering WHERE sensorid=%s AND time=m.time)' % str(i)
-        query += ' FROM metering m WHERE (time >= ? AND time <= ?) GROUP BY time'
-        self.cursor.execute(query, (minTime, maxTime))
+        if minTime is not None and maxTime is not None:
+            query += ' FROM metering m WHERE (time >= ? AND time <= ?) GROUP BY time'
+            self.cursor.execute(query, (minTime, maxTime))
+        else:
+            query += ' FROM metering m GROUP BY time ORDER BY time'
+            self.cursor.execute(query)
         res = []
         for raw in self.cursor.fetchall():
             res.append(self.__makeDict(raw))
         return res
 
     def getAll(self):
-        self.cursor.execute('SELECT max(_id) from sensors')
-        number = self.cursor.fetchone()[0]
-        query = 'SELECT time'
-        for i in range(1, number+1):
-            query += ', (SELECT value FROM metering WHERE sensorid=%s AND time=m.time)' % str(i)
-        query += ' FROM metering m GROUP BY time ORDER BY time'
-        self.cursor.execute(query)
-        res = []
-        for raw in self.cursor.fetchall():
-            res.append(self.__makeDict(raw))
-        return res
+        return self.getInterval()
 
     def getSensors(self):
-        res = self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place, s._id FROM sensors s, sensortypes st WHERE s.type=st._id')
+        self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place FROM sensors s, sensortypes st WHERE s.type=st._id')
+        res = []
+        for raw in self.cursor.fetchall():
+            res.append({'id': raw[0],
+                        'type': raw[1],
+                        'sernum': ' '.join("%X" % ord(c) if ord(c) > 0x0f else '0' + "%X" % ord(c) for c in raw[2]),
+                        'description': raw[3],
+                        'place': raw[4]})
         return res
 
     def close(self):
