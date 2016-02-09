@@ -19,6 +19,7 @@ class DBHelper:
         if len(self.cursor.fetchall()) == 0:
             self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('temperature',))
             self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('pressure',))
+            self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('humidity',))
         self.cursor.execute('CREATE TABLE IF NOT EXISTS sensors' +
                             '(_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,' +
                             'type INTEGER NOT NULL,' +
@@ -34,14 +35,14 @@ class DBHelper:
                             'FOREIGN KEY (sensorid) REFERENCES sensors(_id))')
 
     def getSensorId(self, sensorType, sernum):
-        self.cursor.execute('SELECT _id FROM sensors WHERE sernum=?', (sernum,))
+        self.cursor.execute('SELECT _id FROM sensors WHERE sernum=? AND type=?', (sernum, sensorType))
         selres = self.cursor.fetchall()
         # sensorId = -1
         if len(selres) > 0:
             sensorId = selres[0][0]
         else:
             self.cursor.execute('INSERT INTO sensors (type, sernum, description, place) VALUES (?,?,?,?)', (sensorType, sernum, '', ''))
-            self.cursor.execute('SELECT _id FROM sensors WHERE sernum=?', (sernum,))
+            self.cursor.execute('SELECT _id FROM sensors WHERE sernum=? AND type=?', (sernum, sensorType))
             sensorId = self.cursor.fetchone()[0]
         return sensorId
 
@@ -85,7 +86,7 @@ class DBHelper:
         return self.getInterval()
 
     def getSensors(self):
-        self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place FROM sensors s, sensortypes st WHERE s.type=st._id')
+        self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place FROM sensors s, sensortypes st WHERE s.type=st._id ORDER BY s._id')
         res = []
         for raw in self.cursor.fetchall():
             res.append({'id': raw[0],

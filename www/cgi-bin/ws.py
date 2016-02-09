@@ -3,6 +3,9 @@
 import sys
 import os
 import json
+
+import time
+
 modulePath = os.path.dirname(__file__) + '/../../'
 sys.path.append(modulePath)
 import cgi
@@ -20,10 +23,27 @@ def makeJSON(records):
     return json.JSONEncoder().encode({'sensors': db.getSensors(), 'records': records})
 
 args = cgi.FieldStorage()
-# print 'len = ' + str(len(args))
 if len(args) == 0:
+    sensors = db.getSensors()
+    record = db.getLast()
+    print('Content-type: text/html')
     print
-    print 'Hello'
+    html = """
+    <TITLE>Weatherstation</TITLE>
+    <H1>Weather</H1>
+    <HR>"""
+    html += '<P>' + time.strftime("%d.%b.%Y %H:%M", time.localtime(record['time'])) + '</P>'
+    for i in range(1, len(sensors) + 1):
+        html += '<P>' + str(sensors[i-1]['id']) + ' ' + sensors[i-1]['type'] + ' ' + str(record[str(i)]) + '</P>'
+
+
+
+    # <P>%s</P>
+    # <HR>
+    # <HR>
+    # <HR>
+    # <HR>"""
+    print html
 elif method in args:
     if args[method].value == 'last':
         print "Content-type: application/json"
@@ -44,12 +64,6 @@ elif method in args:
         print
         print (json.JSONEncoder().encode({version: 1}))
 
-
 db.close()
-
-# if 'qwe' in args:
-#     print args['qwe'].value
-# if 'mtd' in args:
-#     print 'method ' + args['mtd'].value
 
 

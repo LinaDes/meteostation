@@ -16,6 +16,7 @@ dbFileName = 'weatherstation.db'
 
 termSensorType = 1
 pressureSensorType = 2
+humiditySensorType = 3
 
 if len(sys.argv) == 3:
     serialPort = sys.argv[1]
@@ -34,10 +35,14 @@ db = DBHelper(dbFileName)
 
 device = Protocol(serialPort, baudRate, logEnabled)
 if device.ping(deviceAddress):
-    pressure, sernum = device.getPressure(deviceAddress)
-    print ('Pressure - ' + str(pressure) + ' mmHg, sensor')
-    pressureSensorId = db.getSensorId(pressureSensorType, sernum)
+    pressure, sernumP = device.getPressure(deviceAddress)
+    print ('Pressure - ' + str(pressure) + ' mmHg')
+    pressureSensorId = db.getSensorId(pressureSensorType, sernumP)
     db.storeValue(currenttime, pressure, pressureSensorId)
+    humidity, sernumH = device.getHumidity(deviceAddress)
+    print ('Humidity - ' + str(humidity) + '%')
+    humiditySensorID = db.getSensorId(humiditySensorType, sernumH)
+    db.storeValue(currenttime, humidity, humiditySensorID)
     numbers = ord(device.getNumbersOfSensors(deviceAddress))
     for i in range(1, numbers+1, 1):
         temperature, sn = device.getTempFromSensorN(0, i)
@@ -45,5 +50,4 @@ if device.ping(deviceAddress):
         device.printPacket(sn)
         termSensorId = db.getSensorId(termSensorType, sn)
         db.storeValue(currenttime, temperature, termSensorId)
-
 db.close()

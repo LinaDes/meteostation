@@ -106,5 +106,17 @@ class Protocol:
             self.printPacket(sernum)
         return pressure, sernum
 
+    def getHumidity(self, adr):
+        if self.log:
+            print ('Get a humidity.')
+        self.sendCommand(chr(adr) + chr(1) + chr(3))
+        res = self.receiveAnswer()
+        humidity, = struct.unpack('<f', res[1:5])
+        sernum = res[5]
+        if self.log:
+            print (str(humidity) + '% on the sensor with the serial number'),
+            self.printPacket(sernum)
+        return humidity, sernum
+
 
 

@@ -23,6 +23,9 @@ classes:
         2   retrieve the pressure
             returns:
                 pressure (int32_t) sernum (1 byte)
+        3   retrieve the humidity
+            returns:
+                humidity (float) sernum (1 byte)
 
 API службы:
 http://host:port/ws.py

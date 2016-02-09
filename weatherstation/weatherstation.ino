@@ -3,10 +3,14 @@
 #include <Adafruit_PCD8544.h>
 #include <Adafruit_BMP085.h>
 #include <OneWire.h>
+#include <DHT.h>
 
 
 #define ONE_WIRE_BUS 10
 #define TEMPERATURE_PRECISION 9
+
+#define DHTPIN 2
+#define DHTTYPE DHT22
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
@@ -15,6 +19,7 @@ Adafruit_BMP085 bmp;
 const unsigned char MAXNUMBERS = 10;
 DeviceAddress addresses[MAXNUMBERS];
 unsigned char numbers;
+DHT dht(DHTPIN, DHTTYPE);
 
 const int bufLength = 8;
 const char SLIP_END = '\xC0';
@@ -140,6 +145,7 @@ void setup()
   display.setContrast(40);
   display.display();
   sensors.begin();
+  dht.begin();
   numbers = 0;
   for (int i = 0; i < MAXNUMBERS; i++)
   {
@@ -150,26 +156,11 @@ void setup()
   for (unsigned char i = 0; i < numbers; i++)
   {
     sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
-//    printAddress(addresses[i]);
   }
 }
 
-//void printAddress(DeviceAddress deviceAddress)
-//{
-//  for (uint8_t i = 0; i < 8; i++)
-//  {
-//    Serial.print(" ");
-//    if (deviceAddress[i] < 16) Serial.print("0");
-//    Serial.print(deviceAddress[i], HEX);
-//  }
-//  Serial.println();
-//}
-
-
 void loop()
 {
-//  display.clearDisplay();
-//  display.display();
   char readbuf[100];
   char writebuf[100];
   char tmpbuf[50];
@@ -177,6 +168,8 @@ void loop()
   sensors.requestTemperatures();
   int32_t pressure = (int32_t)(bmp.readPressure() / 133.3224);
 
+  float humidity = dht.readHumidity();
+  
   int msglen = readCommand(readbuf);
   if (msglen)
   {
@@ -246,6 +239,15 @@ void loop()
                   delay(100);
                   transferData(writebuf, len);
                   break;
+                case 3:
+                  writebuf[0] = LOC_ADR;
+                  memcpy(&writebuf[1], &humidity, 4);
+                  writebuf[5] = 0;
+                  len = addCRC(writebuf, 6);
+                  delay(100);
+                  transferData(writebuf, len);
+                  break;
+                  
             }
             break;
         }
@@ -267,7 +269,16 @@ void loop()
   sprintf(buf, "%ld", pressure);
   for (int i = 0; i < bufLength; i++)
   {
-  display.write(buf[i]);
+    display.write(buf[i]);
+  }
+  display.write('\n');
+  display.write('H');
+  display.write('-');
+  memset(buf, 0, sizeof(buf));
+  dtostrf(humidity, 4, 2, buf);
+  for (int i = 0; i < bufLength; i++)
+  {
+    display.write(buf[i]);
   }
   display.write('\n');
   char tnum = '1';
@@ -287,6 +298,6 @@ void loop()
     tnum++;
   }
   display.display();
-  delay(200);
+  delay(250);
 }
 
