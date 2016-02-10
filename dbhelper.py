@@ -21,7 +21,7 @@ class DBHelper:
                             'version INTEGER NOT NULL)')
         self.cursor.execute('SELECT version FROM dbversion')
         if len(self.cursor.fetchall()) == 0:
-            self.cursor.execute('INSERT INTO dbversion (time, version) VALUES (?,?)', (time.time(), self.version))
+            self.cursor.execute('INSERT INTO dbversion (time, version) VALUES (?,?)', (int(time.time()), self.version))
         self.cursor.execute('CREATE TABLE IF NOT EXISTS sensortypes' +
                             '(_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,' +
                             'type TEXT)')
@@ -62,8 +62,8 @@ class DBHelper:
             sensorId = self.cursor.fetchone()[0]
         return sensorId
 
-    def storeValue(self, currenttime, value, sensorId):
-        self.cursor.execute('INSERT INTO metering (time, value, sensorid) VALUES (?,?,?)', (currenttime, value, sensorId))
+    def storeValue(self, time, value, sensorId):
+        self.cursor.execute('INSERT INTO metering (time, value, sensorid) VALUES (?,?,?)', (int(time), value, sensorId))
 
     def getLast(self):
         self.cursor.execute('SELECT MAX(_id) FROM sensors')
