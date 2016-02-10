@@ -35,14 +35,6 @@ if len(args) == 0:
     html += '<P>' + time.strftime("%d.%b.%Y %H:%M", time.localtime(record['time'])) + '</P>'
     for i in range(1, len(sensors) + 1):
         html += '<P>' + str(sensors[i-1]['id']) + ' ' + sensors[i-1]['type'] + ' ' + str(record[str(i)]) + '</P>'
-
-
-
-    # <P>%s</P>
-    # <HR>
-    # <HR>
-    # <HR>
-    # <HR>"""
     print html
 elif method in args:
     if args[method].value == 'last':
@@ -62,7 +54,7 @@ elif method in args:
     elif args[method].value == version:
         print "Content-type: application/json"
         print
-        print (json.JSONEncoder().encode({version: 1}))
+        print (json.JSONEncoder().encode({version: db.getDBVersion()}))
 
 db.close()
 
