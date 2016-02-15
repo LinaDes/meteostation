@@ -43,6 +43,10 @@ class DBHelper:
                             'value REAL NOT NULL,' +
                             'sensorid INTEGER NOT NULL,' +
                             'FOREIGN KEY (sensorid) REFERENCES sensors(_id))')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "mid" on metering (_id ASC)')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS "time" on metering (time ASC)')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "sid" on sensors (_id ASC)')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "stid" on sensortypes (_id ASC)')
 
     def __makeDict(self, raw):
         res = {'time': raw[0]}
