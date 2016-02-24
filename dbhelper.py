@@ -24,12 +24,13 @@ class DBHelper:
             self.cursor.execute('INSERT INTO dbversion (time, version) VALUES (?,?)', (int(time.time()), self.version))
         self.cursor.execute('CREATE TABLE IF NOT EXISTS sensortypes' +
                             '(_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,' +
-                            'type TEXT)')
+                            'type TEXT,' +
+                            'valuename TEXT)')
         self.cursor.execute('SELECT type FROM sensortypes')
         if len(self.cursor.fetchall()) == 0:
-            self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('temperature',))
-            self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('pressure',))
-            self.cursor.execute('INSERT INTO sensortypes (type) VALUES (?)', ('humidity',))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик температуры', 'град. С'))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик давления воздуха', 'мм рт. ст.'))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик влажности', '%'))
         self.cursor.execute('CREATE TABLE IF NOT EXISTS sensors' +
                             '(_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,' +
                             'type INTEGER NOT NULL,' +
@@ -97,14 +98,15 @@ class DBHelper:
         return self.getInterval()
 
     def getSensors(self):
-        self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place FROM sensors s, sensortypes st WHERE s.type=st._id ORDER BY s._id')
+        self.cursor.execute('SELECT s._id, st.type, s.sernum, s.description, s.place, st.valuename FROM sensors s, sensortypes st WHERE s.type=st._id ORDER BY s._id')
         res = []
         for raw in self.cursor.fetchall():
             res.append({'id': raw[0],
                         'type': raw[1],
                         'sernum': ' '.join("%X" % ord(c) if ord(c) > 0x0f else '0' + "%X" % ord(c) for c in raw[2]),
                         'description': raw[3],
-                        'place': raw[4]})
+                        'place': raw[4],
+                        'valuename': raw[5]})
         return res
 
     def getDBVersion(self):

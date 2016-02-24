@@ -27,7 +27,7 @@ args = cgi.FieldStorage()
 if len(args) == 0:
     sensors = db.getSensors()
     records = db.getLast()
-    print('Content-type: text/html')
+    print 'Content-Type: text/html;charset=utf-8'
     print
     html = """
     <TITLE>Weatherstation</TITLE>
@@ -35,7 +35,7 @@ if len(args) == 0:
     <HR>"""
     html += '<P>' + time.strftime("%d.%b.%Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
     for i in range(1, len(sensors) + 1):
-        html += '<P>' + str(sensors[i-1]['id']) + ' ' + sensors[i-1]['type'] + ' ' + str(records[0][str(i)]) + '</P>'
+        html += '<P>' + str(sensors[i-1]['id']) + ' ' + sensors[i-1]['type'] + ' ' + "%.1f" % records[0][str(i)] + ' ' + sensors[i-1]['valuename'] + '</P>'
     print html
 elif method in args:
     if args[method].value == 'last':

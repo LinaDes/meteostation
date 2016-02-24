@@ -7,27 +7,27 @@
 
 адрес_прибора = 0 (по крайней мере, пока)
 
-classes:
+класс:
     0   PING
-    methods:
-        0   returns 0x55 0xAA 0x55 0xAA
+    методы:
+        0   возвращает 0x55 0xAA 0x55 0xAA
     1   INFO
-    methods:
-        0   qty of temp sensors
-            returns:    qty (unsigned char)
-        1   retrieves a temperature and the sernum from the sensor N
-            data:
-                N (unsigned char)
-                returns:
-                    temperature (float) sernum (8 bytes)
-        2   retrieve the pressure
-            returns:
-                pressure (int32_t) sernum (1 byte)
-        3   retrieve the humidity
-            returns:
-                humidity (float) sernum (1 byte)
+    методы:
+        0   запрос количества датчиков температуры
+            возвращает:    (unsigned char)количество
+        1   запрос показания и серийного номера с датчика темературы N
+            данные:
+                (unsigned char)N
+                возвращает:
+                    (float)температура (8 bytes)sernum
+        2   запрос показания с датчика давления
+            возвращает:
+                (int32_t)давление (char)sernum
+        3   запрос показания с датчика влажности
+            возвращает:
+                (float)влажность (byte)sernum
 
-API службы:
+API службы cgi:
 http://host:port/ws.py
 без параметров
 

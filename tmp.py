@@ -4,7 +4,8 @@ __author__ = 'Andrew Kalinin'
 
 from dbhelper import DBHelper
 
-dbFileName = 'weatherstation.db'
+# dbFileName = 'weatherstation.db'
+dbFileName = 'genweather.db'
 
 db = DBHelper(dbFileName)
 
@@ -12,15 +13,15 @@ db = DBHelper(dbFileName)
 #     print raw
 # print
 
-lastRec = db.getLast()
-print lastRec.keys()
+# lastRec = db.getLast()
+# print lastRec.keys()
 
 print
 
-# for raw in db.getSensors():
-#     print raw
-# print db.getSensors()
-# print
+for raw in db.getSensors():
+    for i in raw.keys():
+        print raw[i],
+    print
 
 # for raw in db.getInterval(1454599872, 1454599965):
 #     print raw

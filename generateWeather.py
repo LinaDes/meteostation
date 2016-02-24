@@ -12,11 +12,11 @@ dbFileName = 'genweather.db'
 termSensorType = 1
 pressureSensorType = 2
 humiditySensorType = 3
-pSn = 111111
-hSn = 2222222
-tsn1 = 33333333
-tsn2 = 44444
-tsn3 = 5555555
+pSn = 1
+hSn = 2
+tsn1 = 3
+tsn2 = 4
+tsn3 = 5
 
 nums = 105121
 # 1487087638
