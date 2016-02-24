@@ -7,6 +7,8 @@ import json
 import time
 
 modulePath = os.path.dirname(__file__) + '/../../'
+# modulePath = os.path.abspath('/home/weather') + '/'
+
 sys.path.append(modulePath)
 import cgi
 from dbhelper import DBHelper
@@ -27,15 +29,18 @@ args = cgi.FieldStorage()
 if len(args) == 0:
     sensors = db.getSensors()
     records = db.getLast()
-    print 'Content-Type: text/html;charset=utf-8'
+    print 'Content-Type: text/html; charset=utf-8'
     print
     html = """
-    <TITLE>Weatherstation</TITLE>
-    <H1>Weather</H1>
+    <TITLE>Метеостанция</TITLE>
+    <H1>Погода</H1>
     <HR>"""
-    html += '<P>' + time.strftime("%d.%b.%Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
+    html += '<P>' + time.strftime("%d %B %Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
+    html += '<table border=1>'
     for i in range(1, len(sensors) + 1):
-        html += '<P>' + str(sensors[i-1]['id']) + ' ' + sensors[i-1]['type'] + ' ' + "%.1f" % records[0][str(i)] + ' ' + sensors[i-1]['valuename'] + '</P>'
+        html += '<tr>'
+        html += '<td>' + str(sensors[i-1]['id']) + '</td><td>' + sensors[i-1]['type'] + '</td><td>' + "%.1f" % records[0][str(i)] + '</td><td>' + sensors[i-1]['valuename'] + '</td>'
+        html += '</tr>'
     print html
 elif method in args:
     if args[method].value == 'last':

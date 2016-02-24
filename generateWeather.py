@@ -43,4 +43,5 @@ for i in range(0, nums):
     termSensorId = db.getSensorId(termSensorType, tsn3)
     db.storeValue(currenttime, t3, termSensorId)
     currenttime += 300
+
 db.close()
