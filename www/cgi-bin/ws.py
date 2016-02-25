@@ -36,10 +36,15 @@ if len(args) == 0:
     <H1>Погода</H1>
     <HR>"""
     html += '<P>' + time.strftime("%d %B %Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
-    html += '<table border=1>'
+    html += '<table border=3>'
     for i in range(1, len(sensors) + 1):
         html += '<tr>'
-        html += '<td>' + str(sensors[i-1]['id']) + '</td><td>' + sensors[i-1]['type'] + '</td><td>' + "%.1f" % records[0][str(i)] + '</td><td>' + sensors[i-1]['valuename'] + '</td>'
+        html += '<td>' + str(sensors[i-1]['id']) + '</td>'
+        html += '<td>' + sensors[i-1]['type'] + '</td>'
+        html += '<td>' + sensors[i-1]['description'] + '</td>'
+        html += '<td>' + sensors[i-1]['place'] + '</td>'
+        html += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
+        html += '<td>' + sensors[i-1]['valuename'] + '</td>'
         html += '</tr>'
     print html
 elif method in args:
