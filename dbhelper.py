@@ -109,6 +109,9 @@ class DBHelper:
                         'valuename': raw[5]})
         return res
 
+    def updateSensor(self, sensorid, description, place):
+        self.cursor.execute('UPDATE sensors SET description = ?, place = ? WHERE _id = ?', (description, place, sensorid))
+
     def getDBVersion(self):
         self.cursor.execute('SELECT version FROM dbversion WHERE _id=(SELECT MAX(_id) FROM dbversion)')
         return self.cursor.fetchone()[0]

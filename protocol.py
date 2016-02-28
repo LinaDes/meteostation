@@ -1,5 +1,3 @@
-__author__ = 'Andrew Kalinin'
-
 import sys
 import serial
 import time

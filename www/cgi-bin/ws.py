@@ -3,14 +3,12 @@
 import sys
 import os
 import json
-
+import cgi
 import time
 
 modulePath = os.path.dirname(__file__) + '/../../'
 # modulePath = os.path.abspath('/home/weather') + '/'
-
 sys.path.append(modulePath)
-import cgi
 from dbhelper import DBHelper
 
 method = 'mtd'
@@ -31,22 +29,22 @@ if len(args) == 0:
     records = db.getLast()
     print 'Content-Type: text/html; charset=utf-8'
     print
-    html = """
-    <TITLE>Метеостанция</TITLE>
-    <H1>Погода</H1>
-    <HR>"""
-    html += '<P>' + time.strftime("%d %B %Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
-    html += '<table border=3>'
+    defaulthtml = """
+    <title>Метеостанция</title>
+    <h1>Погода</h1>
+    <hr>"""
+    defaulthtml += '<P>' + time.strftime("%d.%m.%Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
+    defaulthtml += '<table border=0>'
     for i in range(1, len(sensors) + 1):
-        html += '<tr>'
-        html += '<td>' + str(sensors[i-1]['id']) + '</td>'
-        html += '<td>' + sensors[i-1]['type'] + '</td>'
-        html += '<td>' + sensors[i-1]['description'] + '</td>'
-        html += '<td>' + sensors[i-1]['place'] + '</td>'
-        html += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
-        html += '<td>' + sensors[i-1]['valuename'] + '</td>'
-        html += '</tr>'
-    print html
+        defaulthtml += '<tr>'
+        defaulthtml += '<td>' + str(sensors[i - 1]['id']) + '</td>'
+        defaulthtml += '<td>' + sensors[i - 1]['type'] + '</td>'
+        defaulthtml += '<td>' + sensors[i - 1]['description'] + '</td>'
+        defaulthtml += '<td>' + sensors[i - 1]['place'] + '</td>'
+        defaulthtml += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
+        defaulthtml += '<td>' + sensors[i - 1]['valuename'] + '</td>'
+        defaulthtml += '</tr>'
+    print defaulthtml
 elif method in args:
     if args[method].value == 'last':
         print "Content-type: application/json"
