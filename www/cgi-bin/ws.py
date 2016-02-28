@@ -44,6 +44,7 @@ if len(args) == 0:
         defaulthtml += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
         defaulthtml += '<td>' + sensors[i - 1]['valuename'] + '</td>'
         defaulthtml += '</tr>'
+    defaulthtml += '<p><a href="sensors.py">Датчики</a></p>'
     print defaulthtml
 elif method in args:
     if args[method].value == 'last':

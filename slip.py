@@ -1,5 +1,3 @@
-__author__ = 'Andrew Kalinin'
-
 class SlipConv:
 
     def __init__(self):

@@ -1,5 +1,4 @@
 # - *- coding: utf- 8 - *-
-__author__ = 'Andrew Kalinin'
 
 import sqlite3
 import time
@@ -28,9 +27,9 @@ class DBHelper:
                             'valuename TEXT)')
         self.cursor.execute('SELECT type FROM sensortypes')
         if len(self.cursor.fetchall()) == 0:
-            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик температуры', 'град. С'))
-            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик давления воздуха', 'мм рт. ст.'))
-            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Датчик влажности', '%'))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Температура', 'град. С'))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Давление', 'мм рт. ст.'))
+            self.cursor.execute('INSERT INTO sensortypes (type, valuename) VALUES (?,?)', ('Влажность', '%'))
         self.cursor.execute('CREATE TABLE IF NOT EXISTS sensors' +
                             '(_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,' +
                             'type INTEGER NOT NULL,' +

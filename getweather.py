@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # - *- coding: utf- 8 - *-
-__author__ = 'Andrew Kalinin'
 
 from protocol import Protocol
 import sys
