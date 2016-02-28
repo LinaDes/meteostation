@@ -4,18 +4,25 @@
 ## Структура проекта:
 **weatherstation/weatherstation.ino**
 Скетч для Arduino
+
 **www/webserver.py**
 Web-сервер для отладки
+
 **www/cgi-bin/sensors.py**
 cgi-скрипт для манипуляции со справочником датчиков в БД
+
 **www/cgi-bin/ws.py**
 cgi-скрипт для запроса данных из БД
+
 **dbhelper.py**
 Библиотера для работы с БД
+
 **getweather.py**
 Скрипт для получения данных от Arduino
+
 **protocol.py**
 Библиотека для опроса Arduino
+
 **slip.py**
 Библиотека для slip-преобразования
 
