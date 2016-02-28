@@ -51,23 +51,23 @@ cgi-скрипт для запроса данных из БД
 3   запрос показания с датчика влажности
 возвращает: (float)влажность (byte)sernum
 
-#### API службы cgi:
-http://host:port/ws.py
+## API службы cgi:
+**http://host:port/ws.py**
 Возвращает html-страницу с последней записью из БД
 
-http://host:port/ws.py?mtd=last
+**http://host:port/ws.py?mtd=last**
 Возвращает последнюю запись в формате json-строки
 
-http://host:port/ws.py?mtd=interval&min=XX&max=YY
+**http://host:port/ws.py?mtd=interval&min=XX&max=YY**
 Возвращает диапазон записей между датами min и max в формате json-строки
 
-http://host:port/ws.py?mtd=all
+**http://host:port/ws.py?mtd=all**
 Возвращает все записи в формате json-строки
 
-http://host:port/ws.py?mtd=version
+**http://host:port/ws.py?mtd=version**
 Возвращает версию API в формате json-строки
 
-http://host:port/sensors.py
+**http://host:port/sensors.py**
 Возвращает html-страницу с перечнем датчиков
 
 
