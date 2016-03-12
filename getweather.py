@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # - *- coding: utf- 8 - *-
-
+import math
 from protocol import Protocol
 import sys
 import time
@@ -39,9 +39,10 @@ if device.ping(deviceAddress):
     pressureSensorId = db.getSensorId(pressureSensorType, sernumP)
     db.storeValue(currenttime, pressure, pressureSensorId)
     humidity, sernumH = device.getHumidity(deviceAddress)
-    print ('Humidity - ' + str(humidity) + '%')
-    humiditySensorID = db.getSensorId(humiditySensorType, sernumH)
-    db.storeValue(currenttime, humidity, humiditySensorID)
+    if not math.isnan(humidity):
+        print ('Humidity - ' + str(humidity) + '%')
+        humiditySensorID = db.getSensorId(humiditySensorType, sernumH)
+        db.storeValue(currenttime, humidity, humiditySensorID)
     numbers = ord(device.getNumbersOfSensors(deviceAddress))
     for i in range(1, numbers+1, 1):
         temperature, sn = device.getTempFromSensorN(0, i)

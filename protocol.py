@@ -3,6 +3,9 @@
 import sys
 import serial
 import time
+
+import math
+
 from slip import SlipConv
 import struct
 
@@ -114,9 +117,15 @@ class Protocol:
         humidity, = struct.unpack('<f', res[1:5])
         sernum = res[5]
         if self.log:
-            print (str(humidity) + '% on the sensor with the serial number'),
-            self.printPacket(sernum)
+            if math.isnan(humidity):
+                print 'The humidity sensor doesn\'t exist'
+            else:
+                print (str(humidity) + '% on the sensor with the serial number'),
+                self.printPacket(sernum)
         return humidity, sernum
+
+    def close(self):
+        self.ser.close()
 
 
 
