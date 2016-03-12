@@ -146,6 +146,10 @@ void setup()
   display.display();
   sensors.begin();
   dht.begin();
+}
+
+void loop()
+{
   numbers = 0;
   for (int i = 0; i < MAXNUMBERS; i++)
   {
@@ -157,12 +161,9 @@ void setup()
   {
     sensors.setResolution(addresses[i], TEMPERATURE_PRECISION);
   }
-}
 
-void loop()
-{
   char readbuf[100];
-  char writebuf[100];
+  char writebuf[130];
   char tmpbuf[50];
 
   sensors.requestTemperatures();
@@ -222,15 +223,28 @@ void loop()
                   transferData(writebuf, len);
                   break;
                 case 1:
-                  n = (unsigned char) readbuf[3];
-                  temp = sensors.getTempC(addresses[n-1]);
                   writebuf[0] = LOC_ADR;
-                  memcpy(&writebuf[1], &temp, 4);
-                  memcpy(&writebuf[5], &addresses[n-1], 8);
-                  len = addCRC(writebuf, 13);
+                  writebuf[1] = numbers;
+                  for (int i=0; i < numbers; i++)
+                  {
+                    temp = sensors.getTempC(addresses[i]);
+                    memcpy(&writebuf[i*12+2], &temp, 4);
+                    memcpy(&writebuf[i*12+6], &addresses[i], 8);
+                  }
+                  len = addCRC(writebuf, numbers*12+2);
                   delay(100);
                   transferData(writebuf, len);
                   break;
+
+//                  n = (unsigned char) readbuf[3];
+//                  temp = sensors.getTempC(addresses[n-1]);
+//                  writebuf[0] = LOC_ADR;
+//                  memcpy(&writebuf[1], &temp, 4);
+//                  memcpy(&writebuf[5], &addresses[n-1], 8);
+//                  len = addCRC(writebuf, 13);
+//                  delay(100);
+//                  transferData(writebuf, len);
+//                  break;
                 case 2:
                   writebuf[0] = LOC_ADR;
                   memcpy(&writebuf[1], &pressure, 4);

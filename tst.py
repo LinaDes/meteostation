@@ -15,9 +15,10 @@ if device.ping(deviceAddress):
     humidity, sernumH = device.getHumidity(deviceAddress)
     if not math.isnan(humidity):
         print ('Humidity - ' + str(humidity) + '%')
-    numbers = ord(device.getNumbersOfSensors(deviceAddress))
-    for i in range(1, numbers+1, 1):
-        temperature, sn = device.getTempFromSensorN(0, i)
-        print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
-        device.printPacket(sn)
+    device.getTemp(deviceAddress)
+    # numbers = ord(device.getNumbersOfSensors(deviceAddress))
+    # for i in range(1, numbers+1, 1):
+    #     temperature, sn = device.getTempFromSensorN(0, i)
+    #     print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
+    #     device.printPacket(sn)
 device.close()

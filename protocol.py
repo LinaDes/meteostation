@@ -97,6 +97,19 @@ class Protocol:
             self.printPacket(sernum)
         return temp, sernum
 
+    def getTemp(self, adr):
+        if self.log:
+            print ('Get a temperature from sensors.')
+        self.sendCommand(chr(adr) + chr(1) + chr(1))
+        res = self.receiveAnswer()
+        self.printPacket(res)
+        # temp, = struct.unpack('<f', res[1:5])
+        # sernum = res[5:len(res)]
+        # if self.log:
+        #     print ("%.1f" % temp + 'C on the sensor with the serial number'),
+        #     self.printPacket(sernum)
+        # return temp, sernum
+
     def getPressure(self, adr):
         if self.log:
             print ('Get an atmospheric pressure.')
