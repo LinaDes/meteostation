@@ -16,8 +16,8 @@ version = 'version'
 minThr = 'min'
 maxThr = 'max'
 
-# dbFileName = modulePath + 'weatherstation.db'
-dbFileName = modulePath + 'genweather.db'
+dbFileName = modulePath + 'weatherstation.db'
+# dbFileName = modulePath + 'genweather.db'
 db = DBHelper(dbFileName)
 
 def makeJSON(records):
@@ -36,14 +36,15 @@ if len(args) == 0:
     defaulthtml += '<P>' + time.strftime("%d.%m.%Y %H:%M", time.localtime(records[0]['time'])) + '</P>'
     defaulthtml += '<table border=0>'
     for i in range(1, len(sensors) + 1):
-        defaulthtml += '<tr>'
-        defaulthtml += '<td>' + str(sensors[i - 1]['id']) + '</td>'
-        defaulthtml += '<td>' + sensors[i - 1]['type'] + '</td>'
-        defaulthtml += '<td>' + sensors[i - 1]['description'] + '</td>'
-        defaulthtml += '<td>' + sensors[i - 1]['place'] + '</td>'
-        defaulthtml += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
-        defaulthtml += '<td>' + sensors[i - 1]['valuename'] + '</td>'
-        defaulthtml += '</tr>'
+        if records[0][str(i)] is not None:
+            defaulthtml += '<tr>'
+            defaulthtml += '<td>' + str(sensors[i - 1]['id']) + '</td>'
+            defaulthtml += '<td>' + sensors[i - 1]['type'] + '</td>'
+            defaulthtml += '<td>' + sensors[i - 1]['description'] + '</td>'
+            defaulthtml += '<td>' + sensors[i - 1]['place'] + '</td>'
+            defaulthtml += '<td>' + "%.1f" % records[0][str(i)] + '</td>'
+            defaulthtml += '<td>' + sensors[i - 1]['valuename'] + '</td>'
+            defaulthtml += '</tr>'
     defaulthtml += '<p><a href="sensors.py">Датчики</a></p>'
     print defaulthtml
 elif method in args:

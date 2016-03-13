@@ -12,8 +12,8 @@ from dbhelper import DBHelper
 method = 'mtd'
 sensorNumber = 'sensornumber'
 
-# dbFileName = modulePath + 'weatherstation.db'
-dbFileName = modulePath + 'genweather.db'
+dbFileName = modulePath + 'weatherstation.db'
+# dbFileName = modulePath + 'genweather.db'
 db = DBHelper(dbFileName)
 args = cgi.FieldStorage()
 if len(args) == 0:

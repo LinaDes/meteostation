@@ -235,16 +235,6 @@ void loop()
                   delay(100);
                   transferData(writebuf, len);
                   break;
-
-//                  n = (unsigned char) readbuf[3];
-//                  temp = sensors.getTempC(addresses[n-1]);
-//                  writebuf[0] = LOC_ADR;
-//                  memcpy(&writebuf[1], &temp, 4);
-//                  memcpy(&writebuf[5], &addresses[n-1], 8);
-//                  len = addCRC(writebuf, 13);
-//                  delay(100);
-//                  transferData(writebuf, len);
-//                  break;
                 case 2:
                   writebuf[0] = LOC_ADR;
                   memcpy(&writebuf[1], &pressure, 4);
@@ -286,15 +276,18 @@ void loop()
     display.write(buf[i]);
   }
   display.write('\n');
-  display.write('H');
-  display.write('-');
-  memset(buf, 0, sizeof(buf));
-  dtostrf(humidity, 4, 2, buf);
-  for (int i = 0; i < bufLength; i++)
+  if (!isnan(humidity))
   {
-    display.write(buf[i]);
+    display.write('H');
+    display.write('-');
+    memset(buf, 0, sizeof(buf));
+    dtostrf(humidity, 4, 2, buf);
+    for (int i = 0; i < bufLength; i++)
+    {
+      display.write(buf[i]);
+    }
+    display.write('\n');
   }
-  display.write('\n');
   char tnum = '1';
   for (int i = 0; i < numbers; i++)
   {

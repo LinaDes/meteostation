@@ -76,39 +76,22 @@ class Protocol:
         else:
             return False
 
-    def getNumbersOfSensors(self, adr):
-        if self.log:
-            print ('Get numbers of temperature sensors.')
-        self.sendCommand(chr(adr) + chr(1) + chr(0))
-        res = self.receiveAnswer()
-        if self.log:
-            print ('It has ' + str(ord(res[1])) + ' sensors.')
-        return res[1]
-
-    def getTempFromSensorN(self, adr, number):
-        if self.log:
-            print ('Get a temperature from the sensor ' + str(number) + '.')
-        self.sendCommand(chr(adr) + chr(1) + chr(1) + chr(number))
-        res = self.receiveAnswer()
-        temp, = struct.unpack('<f', res[1:5])
-        sernum = res[5:len(res)]
-        if self.log:
-            print ("%.1f" % temp + 'C on the sensor with the serial number'),
-            self.printPacket(sernum)
-        return temp, sernum
-
     def getTemp(self, adr):
         if self.log:
             print ('Get a temperature from sensors.')
         self.sendCommand(chr(adr) + chr(1) + chr(1))
         res = self.receiveAnswer()
-        self.printPacket(res)
-        # temp, = struct.unpack('<f', res[1:5])
-        # sernum = res[5:len(res)]
-        # if self.log:
-        #     print ("%.1f" % temp + 'C on the sensor with the serial number'),
-        #     self.printPacket(sernum)
-        # return temp, sernum
+        num = ord(res[1])
+        values = []
+        print 'It has ' + str(num) + ' sensors.'
+        for i in range(0, num):
+            temp, = struct.unpack('<f', res[i*12+2:i*12+6])
+            sernum = res[i*12+6:i*12+14]
+            values.append((temp, sernum))
+            if self.log:
+                print ("%.1f" % temp + 'C on the sensor with the serial number'),
+                self.printPacket(sernum)
+        return values
 
     def getPressure(self, adr):
         if self.log:

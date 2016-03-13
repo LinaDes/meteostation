@@ -43,11 +43,13 @@ if device.ping(deviceAddress):
         print ('Humidity - ' + str(humidity) + '%')
         humiditySensorID = db.getSensorId(humiditySensorType, sernumH)
         db.storeValue(currenttime, humidity, humiditySensorID)
-    numbers = ord(device.getNumbersOfSensors(deviceAddress))
-    for i in range(1, numbers+1, 1):
-        temperature, sn = device.getTempFromSensorN(0, i)
+    values = device.getTemp(deviceAddress)
+    i = 1
+    for (temperature, sn) in values:
         print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
         device.printPacket(sn)
+        i += 1
         termSensorId = db.getSensorId(termSensorType, sn)
         db.storeValue(currenttime, temperature, termSensorId)
+device.close()
 db.close()
