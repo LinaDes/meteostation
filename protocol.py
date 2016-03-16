@@ -19,8 +19,10 @@ class Protocol:
         self.ser = serial.Serial()
         self.ser.port = port
         self.ser.baudrate = baudrate
+        self.ser.timeout = 5
         try:
             self.ser.open()
+
         except serial.SerialException as e:
             print ('Oops! IO Error. Check ' + port + ' at ' + str(baudrate) + '.')
             sys.exit(1)
@@ -41,18 +43,20 @@ class Protocol:
 
     def receiveAnswer(self):
         packet = ''
-        char = self.ser.read(1)
-        if char == self.SLIP_END:
-            packet += char
-            beginflag = True
-            while beginflag:
-                c = self.ser.read(1)
-                packet += c
-                if c == self.SLIP_END:
-                    beginflag = False
+        char = ''
+        while True:
+            char = self.ser.read(1)
+            if char == self.SLIP_END:
+                break
+        packet += char
+        beginflag = True
+        while beginflag:
+            c = self.ser.read(1)
+            packet += c
+            if c == self.SLIP_END:
+                beginflag = False
         if self.log:
             print ('Received ' + str(len(packet)) + ' bytes: '),
-        if self.log:
             self.printPacket(packet)
         unsliped = self.slipC.unslip(packet)
         if self.slipC.checkcrc(unsliped):
@@ -61,17 +65,19 @@ class Protocol:
             return self.slipC.getmsgpart(unsliped)
         else:
             if self.log:
-                print ('BAD CRC')
+                print ('BAD CRC,'),
+                print 'received ',
+                self.printPacket(packet)
             return ''
 
 
     def ping(self, adr):
         if self.log:
-            print ('Ping adr = ' + str(adr))
-        self.sendCommand(chr(adr) + chr(0) + chr(200) + chr(233) + chr(193))
+            print ('Ping adr=' + str(adr))
+        self.sendCommand(chr(adr) + chr(0))
         if self.receiveAnswer() == ((chr(0) + chr(0x55) + chr(0xAA) + chr(0x55) + chr(0xAA))):
             if self.log:
-                print ('Ping to ' + str(adr) + ' OK')
+                print ('Ping to adr=' + str(adr) + ' - OK')
             return True
         else:
             return False
