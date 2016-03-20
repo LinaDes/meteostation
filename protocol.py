@@ -44,10 +44,14 @@ class Protocol:
     def receiveAnswer(self):
         packet = ''
         char = ''
-        while True:
+        firsttime = time.time()
+        while (time.time() - firsttime) < self.ser.timeout:
             char = self.ser.read(1)
             if char == self.SLIP_END:
                 break
+        if char != self.SLIP_END:
+            print 'Timeout error!!! Check the connections'
+            sys.exit(1)
         packet += char
         beginflag = True
         while beginflag:
@@ -107,8 +111,11 @@ class Protocol:
         pressure, = struct.unpack('<i', res[1:5])
         sernum = res[5]
         if self.log:
-            print (str(pressure) + ' mmHg on the sensor with the serial number'),
-            self.printPacket(sernum)
+            if 10 < pressure < 1000:
+                print (str(pressure) + ' mmHg on the sensor with the serial number'),
+                self.printPacket(sernum)
+            else:
+                print 'The pressure sensor doesn\'t exist'
         return pressure, sernum
 
     def getHumidity(self, adr):

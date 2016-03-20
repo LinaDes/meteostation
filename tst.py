@@ -11,7 +11,8 @@ logEnabled = True
 device = Protocol(serialPort, baudRate, logEnabled)
 if device.ping(deviceAddress):
     pressure, sernumP = device.getPressure(deviceAddress)
-    print ('Pressure - ' + str(pressure) + ' mmHg')
+    if 10 < pressure < 1000:
+        print ('Pressure - ' + str(pressure) + ' mmHg')
     humidity, sernumH = device.getHumidity(deviceAddress)
     if not math.isnan(humidity):
         print ('Humidity - ' + str(humidity) + '%')

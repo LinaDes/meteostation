@@ -35,9 +35,10 @@ db = DBHelper(dbFileName)
 device = Protocol(serialPort, baudRate, logEnabled)
 if device.ping(deviceAddress):
     pressure, sernumP = device.getPressure(deviceAddress)
-    print ('Pressure - ' + str(pressure) + ' mmHg')
-    pressureSensorId = db.getSensorId(pressureSensorType, sernumP)
-    db.storeValue(currenttime, pressure, pressureSensorId)
+    if 10 < pressure < 1000:
+        print ('Pressure - ' + str(pressure) + ' mmHg')
+        pressureSensorId = db.getSensorId(pressureSensorType, sernumP)
+        db.storeValue(currenttime, pressure, pressureSensorId)
     humidity, sernumH = device.getHumidity(deviceAddress)
     if not math.isnan(humidity):
         print ('Humidity - ' + str(humidity) + '%')
