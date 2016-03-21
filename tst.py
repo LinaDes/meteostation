@@ -6,7 +6,7 @@ from protocol import Protocol
 deviceAddress = 0
 serialPort = '/dev/ttyUSB0'
 baudRate = 9600
-logEnabled = True
+logEnabled = False
 
 device = Protocol(serialPort, baudRate, logEnabled)
 if device.ping(deviceAddress):

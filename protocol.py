@@ -93,12 +93,12 @@ class Protocol:
         res = self.receiveAnswer()
         num = ord(res[1])
         values = []
-        print 'It has ' + str(num) + ' sensors.'
         for i in range(0, num):
             temp, = struct.unpack('<f', res[i*12+2:i*12+6])
             sernum = res[i*12+6:i*12+14]
             values.append((temp, sernum))
             if self.log:
+                print 'It has ' + str(num) + ' temperature sensors:'
                 print ("%.1f" % temp + 'C on the sensor with the serial number'),
                 self.printPacket(sernum)
         return values
