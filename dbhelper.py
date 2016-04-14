@@ -2,6 +2,7 @@
 
 import sqlite3
 import time
+from datetime import datetime
 
 class DBHelper:
 
@@ -43,10 +44,48 @@ class DBHelper:
                             'value REAL NOT NULL,' +
                             'sensorid INTEGER NOT NULL,' +
                             'FOREIGN KEY (sensorid) REFERENCES sensors(_id))')
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS hourlyrecords' +
+                            '(time INTEGER PRIMARY KEY NOT NULL)')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "avgtime" on hourlyrecords (time ASC)')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "mid" on metering (_id ASC)')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS "time" on metering (time ASC)')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "sid" on sensors (_id ASC)')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "stid" on sensortypes (_id ASC)')
+
+    def updateAvgTables(self):
+        self.cursor.execute('SELECT MAX(_id) FROM sensors')
+        number = self.cursor.fetchone()[0]
+        self.cursor.execute('SELECT * FROM hourlyrecords ORDER BY ROWID ASC LIMIT 1')
+        columnnamelist = [tuple[0] for tuple in self.cursor.description]
+        if number > (len(columnnamelist)-1):
+            for i in range(len(columnnamelist), number+1):
+                self.cursor.execute('ALTER TABLE hourlyrecords ADD COLUMN v%s REAL' % str(i))
+        self.cursor.execute('SELECT MIN(time) FROM metering')
+        minrealtime = self.cursor.fetchone()[0]
+        self.cursor.execute('SELECT MAX(time) FROM hourlyrecords')
+        maxavgtime = self.cursor.fetchone()[0]
+        self.cursor.execute('SELECT MAX(time) FROM metering')
+        maxrealtime = self.cursor.fetchone()[0]
+        firsttime = 1
+        if maxavgtime is None:
+            maxavgtime = minrealtime
+            firsttime = 0
+        if maxrealtime is None:
+            maxrealtime = minrealtime
+        begin = datetime.fromtimestamp(float(maxavgtime))
+        end = datetime.fromtimestamp(float(maxrealtime))
+        cyclebegin = datetime(begin.year, begin.month, begin.day, begin.hour+firsttime)
+        cycleend = datetime(end.year, end.month, end.day, end.hour)
+        for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 3600):
+            insert = 'INSERT INTO hourlyrecords (time'
+            select = 'SELECT AVG(time)'
+            for v in range(1, number+1):
+                insert += ', v%s' % str(v)
+                select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
+            insert += ') '
+            select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599))
+            self.cursor.execute(insert + select)
+
 
     def __makeDict(self, raw):
         res = {'time': raw[0]}
@@ -92,6 +131,20 @@ class DBHelper:
             query += ' FROM metering m GROUP BY time ORDER BY time'
             self.cursor.execute(query)
         return [self.__makeDict(raw) for raw in self.cursor.fetchall()]
+
+    # def getInterval(self, minTime = None, maxTime = None):
+    #     self.cursor.execute('SELECT MAX(_id) FROM sensors')
+    #     number = self.cursor.fetchone()[0]
+    #     query = 'SELECT time'
+    #     for i in range(1, number+1):
+    #         query += ', max(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(i)
+    #     if minTime is not None and maxTime is not None:
+    #         query += ' FROM metering WHERE (time >= ? AND time <= ?) GROUP BY time'
+    #         self.cursor.execute(query, (minTime, maxTime))
+    #     else:
+    #         query += ' FROM metering GROUP BY time ORDER BY time'
+    #         self.cursor.execute(query)
+    #     return [self.__makeDict(raw) for raw in self.cursor.fetchall()]
 
     def getAll(self):
         return self.getInterval()

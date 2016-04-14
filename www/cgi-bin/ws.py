@@ -16,8 +16,8 @@ version = 'version'
 minThr = 'min'
 maxThr = 'max'
 
-dbFileName = modulePath + 'weatherstation.db'
-# dbFileName = modulePath + 'genweather.db'
+# dbFileName = modulePath + 'weatherstation.db'
+dbFileName = modulePath + 'genweather.db'
 db = DBHelper(dbFileName)
 
 def makeJSON(records):

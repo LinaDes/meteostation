@@ -1,28 +1,56 @@
 #!/usr/bin/python
 #- *- coding: utf- 8 - *-
-import math
-from protocol import Protocol
+import time
+from datetime import datetime
+from dbhelper import DBHelper
 
-deviceAddress = 0
-serialPort = '/dev/ttyUSB0'
-baudRate = 9600
-logEnabled = False
+dbFileName = 'genweather.db'
+db = DBHelper(dbFileName)
 
-device = Protocol(serialPort, baudRate, logEnabled)
-if device.ping(deviceAddress):
-    pressure, sernumP = device.getPressure(deviceAddress)
-    if 10 < pressure < 1000:
-        print ('Pressure - ' + str(pressure) + ' mmHg')
-    humidity, sernumH = device.getHumidity(deviceAddress)
-    if not math.isnan(humidity):
-        print ('Humidity - ' + str(humidity) + '%')
-    values = device.getTemp(deviceAddress)
-    i = 1
-    for (temperature, sn) in values:
-        print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
-        device.printPacket(sn)
-        i += 1
-device.close()
+
+# now = time.time()
+# dtnow = datetime.fromtimestamp(now)
+# hours = datetime.fromtimestamp(now).hour
+# print 'now',
+# print dtnow
+# print 'hours = ' + str(hours)
+# ndt = datetime(dtnow.year, dtnow.month, dtnow.day, dtnow.hour)
+# print ndt
+# begin = time.mktime(ndt.timetuple())
+# print begin
+# print datetime.fromtimestamp(begin - 3600)
+# print datetime.fromtimestamp(begin - 1)
+# print
+
+db.updateAvgTables()
+db.close()
+
+
+# #!/usr/bin/python
+# #- *- coding: utf- 8 - *-
+# import math
+# from protocol import Protocol
+#
+# deviceAddress = 0
+# serialPort = '/dev/ttyUSB0'
+# baudRate = 9600
+# logEnabled = False
+#
+# device = Protocol(serialPort, baudRate, logEnabled)
+# if device.ping(deviceAddress):
+#     pressure, sernumP = device.getPressure(deviceAddress)
+#     if 10 < pressure < 1000:
+#         print ('Pressure - ' + str(pressure) + ' mmHg')
+#     humidity, sernumH = device.getHumidity(deviceAddress)
+#     if not math.isnan(humidity):
+#         print ('Humidity - ' + str(humidity) + '%')
+#     values = device.getTemp(deviceAddress)
+#     i = 1
+#     for (temperature, sn) in values:
+#         print ('T' + str(i) + ' - ' + "%.1f" % temperature + ' C, sensor'),
+#         device.printPacket(sn)
+#         i += 1
+# device.close()
 
 # #!/usr/bin/python
 # # - *- coding: utf- 8 - *-

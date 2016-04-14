@@ -53,4 +53,5 @@ if device.ping(deviceAddress):
         termSensorId = db.getSensorId(termSensorType, sn)
         db.storeValue(currenttime, temperature, termSensorId)
 device.close()
+db.updateAvgTables()
 db.close()
