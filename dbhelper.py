@@ -46,7 +46,10 @@ class DBHelper:
                             'FOREIGN KEY (sensorid) REFERENCES sensors(_id))')
         self.cursor.execute('CREATE TABLE IF NOT EXISTS hourlyrecords' +
                             '(time INTEGER PRIMARY KEY NOT NULL)')
-        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "avgtime" on hourlyrecords (time ASC)')
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS dailyrecords' +
+                            '(time INTEGER PRIMARY KEY NOT NULL)')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "avgday" on dailyrecords (time ASC)')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "avghour" on hourlyrecords (time ASC)')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "mid" on metering (_id ASC)')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS "time" on metering (time ASC)')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS "sid" on sensors (_id ASC)')
@@ -60,31 +63,50 @@ class DBHelper:
         if number > (len(columnnamelist)-1):
             for i in range(len(columnnamelist), number+1):
                 self.cursor.execute('ALTER TABLE hourlyrecords ADD COLUMN v%s REAL' % str(i))
+                self.cursor.execute('ALTER TABLE dailyrecords ADD COLUMN v%s REAL' % str(i))
         self.cursor.execute('SELECT MIN(time) FROM metering')
         minrealtime = self.cursor.fetchone()[0]
-        self.cursor.execute('SELECT MAX(time) FROM hourlyrecords')
-        maxavgtime = self.cursor.fetchone()[0]
-        self.cursor.execute('SELECT MAX(time) FROM metering')
-        maxrealtime = self.cursor.fetchone()[0]
-        firsttime = 1
-        if maxavgtime is None:
-            maxavgtime = minrealtime
-            firsttime = 0
-        if maxrealtime is None:
-            maxrealtime = minrealtime
-        begin = datetime.fromtimestamp(float(maxavgtime))
-        end = datetime.fromtimestamp(float(maxrealtime))
-        cyclebegin = datetime(begin.year, begin.month, begin.day, begin.hour+firsttime)
-        cycleend = datetime(end.year, end.month, end.day, end.hour)
-        for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 3600):
-            insert = 'INSERT INTO hourlyrecords (time'
-            select = 'SELECT AVG(time)'
-            for v in range(1, number+1):
-                insert += ', v%s' % str(v)
-                select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
-            insert += ') '
-            select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599))
-            self.cursor.execute(insert + select)
+        if minrealtime is not None:
+            self.cursor.execute('SELECT MAX(time) FROM metering')
+            maxrealtime = self.cursor.fetchone()[0]
+            self.cursor.execute('SELECT MAX(time) FROM hourlyrecords')
+            maxhourlyavgtime = self.cursor.fetchone()[0]
+            self.cursor.execute('SELECT MAX(time) FROM dailyrecords')
+            maxdailyavgtime = self.cursor.fetchone()[0]
+            firsthourtime = 1
+            firstdaytime = 1
+            if maxhourlyavgtime is None:
+                maxhourlyavgtime = minrealtime
+                firsthourtime = 0
+            if maxdailyavgtime is None:
+                maxdailyavgtime = minrealtime
+                firstdaytime = 0
+            begin = datetime.fromtimestamp(float(maxhourlyavgtime))
+            end = datetime.fromtimestamp(float(maxrealtime))
+            cyclebegin = datetime(begin.year, begin.month, begin.day, begin.hour+firsthourtime)
+            cycleend = datetime(end.year, end.month, end.day, end.hour)
+            for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 3600):
+                insert = 'INSERT INTO hourlyrecords (time'
+                select = 'SELECT AVG(time)'
+                for v in range(1, number+1):
+                    insert += ', v%s' % str(v)
+                    select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
+                insert += ') '
+                select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599))
+                self.cursor.execute(insert + select)
+            begin = datetime.fromtimestamp(float(maxdailyavgtime))
+            end = datetime.fromtimestamp(float(maxrealtime))
+            cyclebegin = datetime(begin.year, begin.month, begin.day+firsthourtime)
+            cycleend = datetime(end.year, end.month, end.day)
+            for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 86400):
+                insert = 'INSERT INTO dailyrecords (time'
+                select = 'SELECT AVG(time)'
+                for v in range(1, number+1):
+                    insert += ', v%s' % str(v)
+                    select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
+                insert += ') '
+                select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+85399))
+                self.cursor.execute(insert + select)
 
 
     def __makeDict(self, raw):
