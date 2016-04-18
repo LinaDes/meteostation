@@ -96,7 +96,7 @@ class DBHelper:
                 self.cursor.execute(insert + select)
             begin = datetime.fromtimestamp(float(maxdailyavgtime))
             end = datetime.fromtimestamp(float(maxrealtime))
-            cyclebegin = datetime(begin.year, begin.month, begin.day+firsthourtime)
+            cyclebegin = datetime(begin.year, begin.month, begin.day+firstdaytime)
             cycleend = datetime(end.year, end.month, end.day)
             for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 86400):
                 insert = 'INSERT INTO dailyrecords (time'
@@ -154,19 +154,16 @@ class DBHelper:
             self.cursor.execute(query)
         return [self.__makeDict(raw) for raw in self.cursor.fetchall()]
 
-    # def getInterval(self, minTime = None, maxTime = None):
-    #     self.cursor.execute('SELECT MAX(_id) FROM sensors')
-    #     number = self.cursor.fetchone()[0]
-    #     query = 'SELECT time'
-    #     for i in range(1, number+1):
-    #         query += ', max(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(i)
-    #     if minTime is not None and maxTime is not None:
-    #         query += ' FROM metering WHERE (time >= ? AND time <= ?) GROUP BY time'
-    #         self.cursor.execute(query, (minTime, maxTime))
-    #     else:
-    #         query += ' FROM metering GROUP BY time ORDER BY time'
-    #         self.cursor.execute(query)
-    #     return [self.__makeDict(raw) for raw in self.cursor.fetchall()]
+    def updateAllRecordsView(self):
+        self.cursor.execute('SELECT MAX(_id) FROM sensors')
+        number = self.cursor.fetchone()[0]
+        self.cursor.execute('DROP VIEW IF EXISTS allrecords')
+        query = 'CREATE VIEW allrecords AS SELECT time time'
+        for i in range(1, number+1):
+            query += ', max(CASE WHEN sensorid=%s THEN value ELSE NULL END) v%s' % (str(i), str(i))
+        query += ' FROM metering GROUP BY time ORDER BY time'
+        self.cursor.execute(query)
+        return
 
     def getAll(self):
         return self.getInterval()

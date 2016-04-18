@@ -23,6 +23,7 @@ db = DBHelper(dbFileName)
 # print
 
 db.updateAvgTables()
+db.updateAllRecordsView()
 db.close()
 
 
