@@ -105,7 +105,7 @@ class Protocol:
 
     def getPressure(self, adr):
         if self.log:
-            print ('Get an atmospheric pressure.')
+            print ('Get the atmospheric pressure.')
         self.sendCommand(chr(adr) + chr(1) + chr(2))
         res = self.receiveAnswer()
         pressure, = struct.unpack('<i', res[1:5])

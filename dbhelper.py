@@ -86,8 +86,11 @@ class DBHelper:
             cyclebegin = datetime(begin.year, begin.month, begin.day, begin.hour+firsthourtime)
             cycleend = datetime(end.year, end.month, end.day, end.hour)
             for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 3600):
+                self.cursor.execute('SELECT AVG(time) FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599)))
+                if self.cursor.fetchone()[0] is None:
+                    continue
                 insert = 'INSERT INTO hourlyrecords (time'
-                select = 'SELECT AVG(time)'
+                select = 'SELECT CAST(AVG(time) AS INTEGER)'
                 for v in range(1, number+1):
                     insert += ', v%s' % str(v)
                     select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
@@ -99,14 +102,18 @@ class DBHelper:
             cyclebegin = datetime(begin.year, begin.month, begin.day+firstdaytime)
             cycleend = datetime(end.year, end.month, end.day)
             for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 86400):
+                self.cursor.execute('SELECT AVG(time) FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+85399)))
+                if self.cursor.fetchone()[0] is None:
+                    continue
                 insert = 'INSERT INTO dailyrecords (time'
-                select = 'SELECT AVG(time)'
+                select = 'SELECT CAST(AVG(time) AS INTEGER)'
                 for v in range(1, number+1):
                     insert += ', v%s' % str(v)
                     select += ', AVG(CASE WHEN sensorid=%s THEN value ELSE NULL END)' % str(v)
                 insert += ') '
                 select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+85399))
-                self.cursor.execute(insert + select)
+                query = insert + select
+                self.cursor.execute(query)
 
 
     def __makeDict(self, raw):
