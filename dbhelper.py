@@ -73,19 +73,21 @@ class DBHelper:
             maxhourlyavgtime = self.cursor.fetchone()[0]
             self.cursor.execute('SELECT MAX(time) FROM dailyrecords')
             maxdailyavgtime = self.cursor.fetchone()[0]
-            firsthourtime = 1
-            firstdaytime = 1
+            firsthourtime = 3600
+            firstdaytime = 86400
             if maxhourlyavgtime is None:
                 maxhourlyavgtime = minrealtime
                 firsthourtime = 0
             if maxdailyavgtime is None:
                 maxdailyavgtime = minrealtime
                 firstdaytime = 0
-            begin = datetime.fromtimestamp(float(maxhourlyavgtime))
-            end = datetime.fromtimestamp(float(maxrealtime))
-            cyclebegin = datetime(begin.year, begin.month, begin.day, begin.hour+firsthourtime)
-            cycleend = datetime(end.year, end.month, end.day, end.hour)
-            for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 3600):
+            begintimestamp = datetime.fromtimestamp(float(maxhourlyavgtime))
+            endtimestamp = datetime.fromtimestamp(float(maxrealtime))
+            firstedge = datetime(begintimestamp.year, begintimestamp.month, begintimestamp.day, begintimestamp.hour)
+            secondedge = datetime(endtimestamp.year, endtimestamp.month, endtimestamp.day, endtimestamp.hour)
+            begin = int(time.mktime(firstedge.timetuple())) + firsthourtime
+            end = int(time.mktime(secondedge.timetuple()))-1
+            for i in range(begin, end, 3600):
                 self.cursor.execute('SELECT AVG(time) FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599)))
                 if self.cursor.fetchone()[0] is None:
                     continue
@@ -97,11 +99,13 @@ class DBHelper:
                 insert += ') '
                 select += ' FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+3599))
                 self.cursor.execute(insert + select)
-            begin = datetime.fromtimestamp(float(maxdailyavgtime))
-            end = datetime.fromtimestamp(float(maxrealtime))
-            cyclebegin = datetime(begin.year, begin.month, begin.day+firstdaytime)
-            cycleend = datetime(end.year, end.month, end.day)
-            for i in range(int(time.mktime(cyclebegin.timetuple())), int(time.mktime(cycleend.timetuple()))-1, 86400):
+            begintimestamp = datetime.fromtimestamp(float(maxdailyavgtime))
+            endtimestamp = datetime.fromtimestamp(float(maxrealtime))
+            firstedge = datetime(begintimestamp.year, begintimestamp.month, begintimestamp.day)
+            secondedge = datetime(endtimestamp.year, endtimestamp.month, endtimestamp.day)
+            begin = int(time.mktime(firstedge.timetuple())) + firstdaytime
+            end = int(time.mktime(secondedge.timetuple()))-1
+            for i in range(begin, end, 86400):
                 self.cursor.execute('SELECT AVG(time) FROM metering WHERE time >= %s AND time <= %s' % (str(i), str(i+85399)))
                 if self.cursor.fetchone()[0] is None:
                     continue
