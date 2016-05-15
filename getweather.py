@@ -4,6 +4,7 @@ import math
 from protocol import Protocol
 import sys
 import time
+import os
 from dbhelper import DBHelper
 
 deviceAddress = 0
@@ -12,6 +13,8 @@ baudRate = 9600
 logEnabled = True
 
 dbFileName = 'weatherstation.db'
+# modulePath = os.path.abspath('/home/weather') + '/'
+# dbFileName = modulePath + 'weatherstation.db'
 
 termSensorType = 1
 pressureSensorType = 2
