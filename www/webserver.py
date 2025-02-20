@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # - *- coding: utf- 8 - *-
 
-import BaseHTTPServer
-import CGIHTTPServer
+import http.server
 import cgitb
 cgitb.enable()
 
-server = BaseHTTPServer.HTTPServer
-handler = CGIHTTPServer.CGIHTTPRequestHandler
+server = http.server.HTTPServer
+handler = http.server.CGIHTTPRequestHandler
 server_address = ("", 8000)
 handler.cgi_directories = ["/cgi-bin"]
 
